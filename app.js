@@ -99,7 +99,7 @@ function render(resetFilter=false){let next=route();if(!(next==='login'||Object.
 function updateFilters(){const el=$('#filtered');if(el)el.innerHTML=current==='ferramentas'?toolsTable():alertList()}
 function toast(text){clearTimeout(toastTimer);$('#toast').innerHTML=icon('check','sm')+escapeHTML(text);$('#toast').classList.add('show');toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),3400)}
 const modal=(title,body,actions='')=>{const d=$('#dialog');$('#dialog-content').innerHTML=`<div class="modal-head"><h2 id="modal-title">${title}</h2><button class="modal-close" data-action="close-dialog" aria-label="Fechar">${icon('x')}</button></div><div class="modal-body">${body}</div><div class="modal-actions">${button('Fechar','close-dialog','','secondary')}${actions}</div>`;if(!d.open)d.showModal()};
-function downloadCSV(name,headers,rows){const quote=value=>'"'+String(value).replace(/"/g,'""')+'"';const csv='\ufeff'+[headers,...rows].map(r=>r.map(quote).join(';')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const href=URL.createObjectURL(blob);const a=document.createElement('a');a.download=name+'.csv';a.href=href;a.click();setTimeout(()=>URL.revokeObjectURL(href),1000);toast('Arquivo demonstrativo gerado.')}
+function downloadCSV(name,headers,rows){const quote=value=>{let safe=String(value);if(/^\s*[=+\-@]/.test(safe))safe="'"+safe;return '"'+safe.replace(/"/g,'""')+'"'};const csv='\ufeff'+[headers,...rows].map(r=>r.map(quote).join(';')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const href=URL.createObjectURL(blob);const a=document.createElement('a');a.download=name+'.csv';a.href=href;a.click();setTimeout(()=>URL.revokeObjectURL(href),1000);toast('Arquivo demonstrativo gerado.')}
 document.addEventListener('click',(event)=>{const btn=event.target.closest('[data-action]');if(!btn)return;const act=btn.dataset.action,id=btn.dataset.id;switch(act){
  case 'menu':$('.shell')?.classList.add('open');break;
  case 'close-menu':$('.shell')?.classList.remove('open');break;
@@ -128,6 +128,8 @@ document.addEventListener('click',(event)=>{const btn=event.target.closest('[dat
  }});
 document.addEventListener('input',e=>{if(e.target.id==='search'){filter.query=e.target.value;updateFilters()}});
 document.addEventListener('change',e=>{if(e.target.id==='status-filter'){filter.status=e.target.value;updateFilters()}if(e.target.id==='area-filter'){filter.area=e.target.value;updateFilters()}});
+document.addEventListener('submit',e=>{if(e.target.id==='tool-form'||e.target.id==='policy-form'){e.preventDefault();$(`[data-action="${e.target.id==='tool-form'?'save-tool':'save-policy'}"]`)?.click()}});
+$('.skip-link').addEventListener('click',e=>{e.preventDefault();const c=$('#content');if(c){c.setAttribute('tabindex','-1');c.focus();c.scrollIntoView({block:'start'})}});
 window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);$('#content')?.focus({preventScroll:true})});
 $('#dialog').addEventListener('click',e=>{if(e.target===$('#dialog'))$('#dialog').close()});
 render();
